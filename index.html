@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+    <title>Requests Tutorial</title>
+
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <py-config>
+        packages = ["requests", "pyodide-http"]
+    </py-config>
+    <div class="container">
+            <div class="header">Weather</div>
+            <div class="body">
+                <input id="text-city" type="text">
+                <button py-click="search_city()">Search</button>
+            </div>
+            <div class="name-city">Hà Nội</div>
+            <div class="info">
+                <div id="text-temp"></div>
+                <div id="text-icon"></div>
+            </div>
+            <div id="bug"></div>
+    </div>
+    <py-script>
+        import requests
+        import pyodide_http
+
+        # Patch the Requests library so it works with Pyscript
+        pyodide_http.patch_requests()
+        def search_city():
+            city = Element("text-city").value
+            # Make a request to the JSON Placeholder API
+            api_key = "055aeac3a67e16ec95390dc579f058ad"
+            api_url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}"
+            try:
+                response = requests.get(api_url).json()
+                Element("text-temp").element.innerText = round(response["main"]["temp"] - 273.15,2)
+                icon_url = f"""https://openweathermap.org/img/wn/{response["weather"][0]["icon"]}@4x.png"""
+                Element("text-icon").element.innerHTML = f"""<img src="{icon_url}" alt="khong_co">"""
+                Element("bug").element.innerText = ""
+                #print(response["weather"][0]["icon"])
+            except:
+                Element("bug").element.innerText = "Something went wrong"
+                Element("text-icon").element.innerHTML = ""
+    </py-script>
+</body>
+
+</html>
